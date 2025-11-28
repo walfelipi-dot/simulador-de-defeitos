@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tech Patch - Simulador de Defeitos de Computador</title>
+<title> Tech Patch- Simulador de Defeitos de Computador</title>
+
 <style>
     body {
         font-family: 'Segoe UI', sans-serif;
@@ -111,8 +112,8 @@
     }
    
     .hardware-img {
-        width: 200px;
-        height: 200px;
+        width: 190px;
+        height: 190px;
         border-radius: 10px;
         object-fit: cover;
         box-shadow: 0 0 15px rgba(0, 204, 255, 0.5);
@@ -182,7 +183,7 @@
         color: #ff6666;
     }
    
-    @media (max-width: 768px) {
+    @media (max-width: 800px) {
         .game-layout {
             grid-template-columns: 1fr;
             gap: 15px;
@@ -204,7 +205,17 @@
 </style>
 </head>
 <body>
-
+<img src="TechPatch.png" class="logo-fixed" alt="Logo TechPatch">
+<style>
+.logo-fixed {
+    position: fixed;
+    bottom: 15px;   /* distância da parte inferior */
+    right: 15px;    /* distância da lateral direita */
+    width: 120px;   /* tamanho da logo */
+    opacity: 0.9;   /* leve transparência */
+    z-index: 999;   /* mantém a logo acima do resto */
+}
+</style>
 <div id="game-container">
     <h1>TECH PATCH</h1>
     <h2>Simulador de Defeitos de Computador</h2>
@@ -212,20 +223,30 @@
         <p>Digite seu nome para começar:</p>
         <input type="text" id="playerName" placeholder="Seu nome">
         <button id="start-btn">Iniciar Jogo</button>
+   
     </div>
-</div>
+      </div>
 
 <audio id="sound-correct" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
 <audio id="sound-wrong" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
 <audio id="sound-victory" src="https://actions.google.com/sounds/v1/cartoon/trumpet_fanfare.ogg"></audio>
 
 <script>
+  function embaralhar(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
 const questions = [
+ 
   {
     "q": "Seu computador liga, mas desliga sozinho após alguns minutos de uso intenso (como jogos). Você nota que as temperaturas da CPU estão extremamente altas. Qual é a causa provável e a solução?",
     "a": [
       "Fonte de Alimentação (PSU) fraca. A solução é comprar uma fonte com mais Watts.",
-      "Superaquecimento da CPU. A solução é verificar se o cooler está bem encaixado e, provavelmente, trocar a pasta térmica.",
+      "Superaquecimento da CPU. A solução é verificar se o cooler está bem encaixado.",
       "Falha na Memória RAM. A solução é testar os módulos de RAM individualmente.",
       "Placa de Vídeo (GPU) com defeito. A solução é reinstalar os drivers de vídeo."
     ],
@@ -238,7 +259,7 @@ const questions = [
     "a": [
       "Processador (CPU) queimado.",
       "Memória RAM mal encaixada.",
-      "Fonte de Alimentação (PSU) queimada ou cabo de força desconectado.",
+      "Fonte de Alimentação (PSU) desconectada.",
       "Disco Rígido (HDD) com defeito."
     ],
     "correct": 2,
@@ -249,9 +270,9 @@ const questions = [
     "q": "O computador liga, os coolers giram, mas não há imagem no monitor e a placa-mãe emite uma sequência de bipes (ex: um bipe longo e dois curtos). O que isso significa?",
     "a": [
       "O monitor está queimado.",
-      "O sistema operacional está corrompido.",
-      "Erro de POST (Power-On Self-Test). Os bipes são um código que indica qual peça falhou (geralmente RAM ou Placa de Vídeo).",
-      "A Fonte de Alimentação (PSU) não é potente o suficiente."
+      "O sistema operacional está corrompido. Causando sons estranhos no Hardware ",
+      "Erro de POST. Os bipes são um código que indica uma falha em alguma peça.",
+      "A Fonte de Alimentação, talvez não tenha energia o suficiente, isso explica os bipes."
     ],
     "correct": 2,
     "hint": "A placa-mãe faz uma autoverificação antes de iniciar. Esses sons são mensagens de erro dessa verificação.",
@@ -261,8 +282,8 @@ const questions = [
     "q": "Seu sistema operacional está extremamente lento para iniciar e você ouve barulhos de \"cliques\" rítmicos vindos do gabinete. Qual componente provavelmente falhou e qual a ação imediata?",
     "a": [
       "SSD. A solução é atualizar o firmware.",
-      "Disco Rígido (HDD) mecânico. A ação imediata é fazer backup de todos os dados importantes.",
-      "Cooler do processador. A solução é limpar a poeira.",
+      "Disco Rígido (HDD) mecânico. A solução é trocar a fonte.",
+      "Cooler do processador. A solução é limpar a poeira. ",
       "Fonte de Alimentação (PSU). A solução é trocar a fonte."
     ],
     "correct": 1,
@@ -273,7 +294,7 @@ const questions = [
     "q": "Durante jogos, a imagem apresenta \"artefatos\" (cores estranhas, pixels piscando, texturas que não carregam). Qual é o componente suspeito e a primeira tentativa de solução?",
     "a": [
       "Processador (CPU). Tentar reduzir o overclock.",
-      "Placa de Vídeo (GPU). Reinstalar os drivers de vídeo (usando DDU) ou verificar superaquecimento da GPU.",
+      "Placa de Vídeo (GPU). Verificar superaquecimento da GPU.",
       "Monitor. Trocar o cabo HDMI ou DisplayPort.",
       "Memória RAM. Limpar os contatos."
     ],
@@ -285,8 +306,8 @@ const questions = [
     "q": "O computador apresenta \"Telas Azuis da Morte\" (BSOD) aleatórias e frequentes no Windows. Qual é o suspeito mais comum e um teste válido?",
     "a": [
       "Disco Rígido (HDD). Rodar o comando chkdsk.",
-      "Fonte de Alimentação (PSU). Medir as voltagens.",
-      "Processador (CPU). Verificar a temperatura.",
+      "Fonte de Alimentação (PSU). Medir as voltagens e virificar a conexão do cabo de força.",
+      "Processador (CPU). Verificar a temperatura e trocar pasta termica.",
       "Memória RAM. Limpar os contatos de ouro com uma borracha e testar os módulos um de cada vez."
     ],
     "correct": 3,
@@ -345,7 +366,7 @@ const questions = [
     "q": "Você está montando um PC novo e precisa aplicar pasta térmica no processador. Qual é a quantidade ideal e o método correto?",
     "a": [
       "Aplicar uma camada grossa cobrindo todo o processador e espalhar com o dedo.",
-      "Aplicar uma quantidade do tamanho de um grão de arroz no centro do processador e deixar o cooler espalhar naturalmente.",
+      "Aplicar uma quantidade do tamanho de um grão de arroz no centro do processador.",
       "Não precisa aplicar pasta térmica, o cooler já vem com ela aplicada de fábrica sempre.",
       "Aplicar pasta térmica também na base do cooler para melhor condução."
     ],
@@ -369,7 +390,7 @@ const questions = [
     "q": "Seu Windows está lento e você suspeita de vírus. Qual é o primeiro passo mais eficaz antes de formatar?",
     "a": [
       "Desinstalar todos os programas e reinstalar um por um.",
-      "Iniciar no Modo de Segurança e executar uma varredura completa com Windows Defender e Malwarebytes.",
+      "Iniciar no Modo de Segurança e executar uma varredura completa.",
       "Deletar a pasta System32 para remover arquivos corrompidos.",
       "Trocar o HD/SSD imediatamente."
     ],
@@ -380,10 +401,10 @@ const questions = [
   {
     "q": "Você montou um PC novo, ligou, mas não aparece imagem. Os LEDs da placa-mãe acendem e os coolers giram. Qual é o primeiro componente a verificar?",
     "a": [
-      "Verificar se a Memória RAM está corretamente encaixada nos slots (fazer pressão até ouvir o clique).",
-      "Trocar o processador imediatamente.",
-      "Verificar se o gabinete está aterrado.",
-      "Reinstalar o Windows."
+      "Verificar se a Memória RAM está encaixada nos slots.",
+      "Trocar o processador esta queimado.",
+      "Verificar se o gabinete está conectado a tomada.",
+      "Reinstalar o seu sistema operacional."
     ],
     "correct": 0,
     "hint": "O componente mais comum de ser mal instalado na primeira montagem é a RAM, que precisa de bastante pressão para encaixar.",
@@ -393,7 +414,7 @@ const questions = [
     "q": "Ao atualizar a BIOS da placa-mãe, a energia acabou no meio do processo. O computador não liga mais. Qual é a situação e possível solução?",
     "a": [
       "A placa-mãe está permanentemente danificada e precisa ser substituída.",
-      "A BIOS está corrompida. Algumas placas possuem botão de Clear CMOS ou dual BIOS para recuperação.",
+      "A BIOS está corrompida. Algumas placas possuem botão de Clear CMOS para recuperação.",
       "Apenas reinstalar o Windows resolve o problema.",
       "Trocar o processador vai fazer o sistema funcionar novamente."
     ],
@@ -405,8 +426,8 @@ const questions = [
     "q": "Você comprou um processador Intel de 12ª geração (LGA 1700) e uma placa-mãe com socket LGA 1200. O que acontece?",
     "a": [
       "Funciona normalmente, os sockets são compatíveis.",
-      "Não funciona. O processador não encaixa fisicamente no socket da placa-mãe pois são incompatíveis.",
-      "Funciona, mas com desempenho reduzido.",
+      "Não funciona. O processador não encaixa no socket da placa-mãe.",
+      "Funciona, mas com um desempenho muito ruim.",
       "Precisa apenas atualizar a BIOS para funcionar."
     ],
     "correct": 1,
@@ -429,9 +450,9 @@ const questions = [
     "q": "Você quer criar uma partição nova no seu HD para organizar arquivos, mas a opção 'Diminuir Volume' está acinzentada no Gerenciamento de Discos do Windows. Por quê?",
     "a": [
       "O disco está formatado em FAT32 em vez de NTFS.",
-      "Existem arquivos imóveis (como arquivo de paginação ou pontos de restauração) no meio do disco.",
-      "O HD está com defeito físico.",
-      "É necessário usar o Prompt de Comando, o Gerenciamento de Discos não permite diminuir volumes."
+      "Existem arquivos imóveis no meio do disco.",
+      "O HD está com defeito físico. O que dificulta o salvamento",
+      "É necessário usar o Prompt de Comando."
     ],
     "correct": 1,
     "hint": "O Windows não consegue mover certos arquivos de sistema durante o redimensionamento enquanto está em execução.",
@@ -462,7 +483,7 @@ const questions = [
     "img": "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=400&h=400&fit=crop&q=80"
   }
 ];
-
+embaralhar(questions);
 let currentQuestion = 0;
 let score = 0;
 let playerName = "";
@@ -614,22 +635,23 @@ function endGame() {
     clearInterval(timerInterval);
     const percentage = Math.round((score / questions.length) * 100);
     let message = "";
-   
-    // Tocar som de vitória se fez mais de 14 pontos
-    if (score > 14) {
-        victorySound.play();
+
+    if (percentage === 100) {
+        message = "👑 Perfeito! Você é um T.I nato!";
     }
-   
-    if (percentage >= 90) {
+    else if (percentage >= 90) {
         message = "🏆 Excelente! Você é um expert em TI!";
-    } else if (percentage >= 70) {
-        message = "👍 Muito bom! Você tem conhecimento sólido!";
-    } else if (percentage >= 50) {
+    }
+    else if (percentage >= 70) {
+        message = "📈 Ótimo! Falta bem pouco para alcançar a perfeição!";
+    }
+    else if (percentage >= 50) {
         message = "📚 Razoável! Continue estudando!";
-    } else {
+    }
+    else {
         message = "💪 Precisa estudar mais! Não desista!";
     }
-   
+
     content.innerHTML = `
         <h3>Fim do jogo, ${playerName}!</h3>
         <p id="score">Você acertou ${score} de ${questions.length} perguntas.</p>
@@ -639,10 +661,10 @@ function endGame() {
     `;
 }
 
+
 function restartGame() {
     document.location.reload();
 }
 </script>
-
 </body>
 </html>
