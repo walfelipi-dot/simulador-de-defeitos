@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title> Tech Patch- Simulador de Defeitos de Computador</title>
+
+<style>
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background: radial-gradient(circle at top, #003366, #000);
+        color: #fff;
+        text-align: center;
+        margin: 0;
+        padding: 10px;
+        overflow-x: hidden;
+    }
+    #game-container {
+        max-width: 900px;
+        margin: 20px auto;
+        background: rgba(0, 0, 0, 0.6);
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 0 25px #00ccff;
+    }
+    h1 {
+        color: #00ccff;
+        font-size: 32px;
+        text-shadow: 2px 2px 6px #000;
+        margin: 10px 0;
+    }
+    h2 {
+        color: #ffff66;
+        font-size: 18px;
+        margin: 5px 0;
+    }
+    h3 {
+        font-size: 16px;
+        margin: 10px 0;
+    }
+    .question-text {
+        font-size: 15px;
+        margin: 10px 0;
+        padding: 10px;
+        background: rgba(0, 150, 255, 0.1);
+        border-radius: 10px;
+        line-height: 1.4;
+    }
+    button {
+        display: block;
+        width: 100%;
+        margin: 8px auto;
+        padding: 10px;
+        font-size: 14px;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        background-color: #00bfff;
+        color: #000;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    button:hover {
+        background-color: #00ffcc;
+    }
+    button:disabled {
+        background-color: #666;
+        cursor: not-allowed;
+    }
+    #start-btn, #restart-btn {
+        width: 60%;
+        background-color: #00ffcc;
+        padding: 15px;
+        font-size: 18px;
+    }
+    #score {
+        font-size: 20px;
+        color: #00ff00;
+        margin-top: 15px;
+    }
+    #timer {
+        font-size: 18px;
+        color: #ffcc00;
+        margin: 5px 0;
+    }
+    .progress {
+        font-size: 16px;
+        color: #00ccff;
+        margin: 5px 0;
+    }
+    input {
+        padding: 10px;
+        width: 60%;
+        font-size: 18px;
+        border-radius: 8px;
+        border: none;
+        margin: 10px;
+    }
+   
+    .game-layout {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 20px;
+        margin: 15px 0;
+        align-items: start;
+    }
+   
+    .left-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+   
+    .hardware-img {
+        width: 190px;
+        height: 190px;
+        border-radius: 10px;
+        object-fit: cover;
+        box-shadow: 0 0 15px rgba(0, 204, 255, 0.5);
+    }
+   
+    .side-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+   
+    .side-buttons button {
+        padding: 10px;
+        font-size: 14px;
+        margin: 0;
+    }
+   
+    #hint {
+        background-color: #ffcc00;
+        color: #000;
+    }
+   
+    #hint:hover {
+        background-color: #ffff66;
+    }
+   
+    .right-panel {
+        display: flex;
+        flex-direction: column;
+    }
+   
+    #answers {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 10px;
+    }
+   
+    .answer-btn {
+        text-align: left;
+        padding: 12px;
+        font-size: 13px;
+        line-height: 1.3;
+    }
+   
+    .correct-answer {
+        background-color: #00ff00 !important;
+        color: #000;
+    }
+    .wrong-answer {
+        background-color: #ff0000 !important;
+        color: #fff;
+    }
+    .feedback {
+        font-size: 16px;
+        margin: 10px 0;
+        padding: 12px;
+        border-radius: 10px;
+        font-weight: bold;
+    }
+    .feedback.correct {
+        background-color: rgba(0, 255, 0, 0.3);
+        color: #00ff00;
+    }
+    .feedback.wrong {
+        background-color: rgba(255, 0, 0, 0.3);
+        color: #ff6666;
+    }
+   
+    @media (max-width: 800px) {
+        .game-layout {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        .left-panel {
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+        .hardware-img {
+            width: 150px;
+            height: 150px;
+        }
+        #answers {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+</head>
+<body>
+<img src="TechPatch.png" class="logo-fixed" alt="Logo TechPatch">
+<style>
+.logo-fixed {
+    position: fixed;
+    bottom: 870px;   /* distância da parte inferior */
+    left: 15px;    /* distância da lateral direita */
+    width: 70px;   /* tamanho da logo */
+    opacity: 0.9;   /* leve transparência */
+    z-index: 999;   /* mantém a logo acima do resto */
+}
+</style>
+<div id="game-container">
+    <h1>TECH PATCH</h1>
+    <h2>Simulador de Defeitos de Computador</h2>
+    <div id="content">
+        <p>Digite seu nome para começar:</p>
+        <input type="text" id="playerName" placeholder="Seu nome">
+        <button id="start-btn">Iniciar Jogo</button>
+   
+    </div>
+      </div>
+
+<audio id="sound-correct" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+<audio id="sound-wrong" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+<audio id="sound-victory" src="https://actions.google.com/sounds/v1/cartoon/trumpet_fanfare.ogg"></audio>
+
+<script>
+  function embaralhar(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+const questions = [
+ 
+  {
+    "q": "Seu computador liga, mas desliga sozinho após alguns minutos de uso intenso (como jogos). Você nota que as temperaturas da CPU estão extremamente altas. Qual é a causa provável e a solução?",
+    "a": [
+      "Fonte de Alimentação (PSU) fraca. A solução é comprar uma fonte com mais Watts.",
+      "Superaquecimento da CPU. A solução é verificar se o cooler está bem encaixado.",
+      "Falha na Memória RAM. A solução é testar os módulos de RAM individualmente.",
+      "Placa de Vídeo (GPU) com defeito. A solução é reinstalar os drivers de vídeo."
+    ],
+    "correct": 1,
+    "hint": "O desligamento é uma proteção. O que no computador precisa ser ativamente resfriado quando está trabalhando muito?",
+    "img": "https://images.unsplash.com/photo-1555617981-dac3880eac6e?w=400&h=400&fit=crop&q=80"
+  },
+  {
+    "q": "Ao apertar o botão de ligar, o computador não dá absolutamente nenhum sinal de vida (nenhuma luz, nenhum cooler gira). Qual é o culpado mais provável?",
+    "a": [
+      "Processador (CPU) queimado.",
+      "Memória RAM mal encaixada.",
+      "Fonte de Alimentação (PSU) desconectada.",
+      "Disco Rígido (HDD) com defeito."
+    ],
+    "correct": 2,
+    "hint": "Qual é o primeiro componente que recebe energia da tomada e a distribui para o resto do sistema?",
+    "img": "https://images.unsplash.com/photo-1587202372634-32705e3bf49c?w=400&h=400&fit=crop&q=80"
+  },
+  {
+    "q": "O computador liga, os coolers giram, mas não há imagem no monitor e a placa-mãe emite uma sequência de bipes (ex: um bipe longo e dois curtos). O que isso significa?",
+    "a": [
+      "O monitor está queimado.",
+      "O sistema operacional está corrompido. Causando sons estranhos no Hardware ",
+      "Erro de POST. Os bipes são um código que indica uma falha em alguma peça.",
+      "A Fonte de Alimentação, talvez não tenha energia o suficiente, isso explica os bipes."
+    ],
+    "correct": 2,
+    "hint": "A placa-mãe faz uma autoverificação antes de iniciar. Esses sons são mensagens de erro dessa verificação.",
+    "img": "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=400&h=400&fit=crop&q=80"
+  },
+  {
+    "q": "Seu sistema operacional está extremamente lento para iniciar e você ouve barulhos de \"cliques\" rítmicos vindos do gabinete. Qual componente provavelmente falhou e qual a ação imediata?",
+    "a": [
+      "SSD. A solução é atualizar o firmware.",
+      "Disco Rígido (HDD) mecânico. A solução é trocar a fonte.",
+      "Cooler do processador. A solução é limpar a poeira. ",
+      "Fonte de Alimentação (PSU). A solução é trocar a fonte."
+    ],
+    "correct": 1,
+    "hint": "Qual componente de armazenamento antigo usa discos giratórios e uma agulha de leitura?",
+    "img": "https://images.unsplash.com/photo-1531492746076-161ca9bcad58?w=400&h=400&fit=crop&q=80"
+  },
+  {
+    "q": "Durante jogos, a imagem apresenta \"artefatos\" (cores estranhas, pixels piscando, texturas que não carregam). Qual é o componente suspeito e a primeira tentativa de solução?",
+    "a": [
+      "Processador (CPU). Tentar reduzir o overclock.",
+      "Placa de Vídeo (GPU). Verificar superaquecimento da GPU.",
+      "Monitor. Trocar o cabo HDMI ou DisplayPort.",
+      "Memória RAM. Limpar os contatos."
+    ],
+    "correct": 1,
+    "hint": "Qual peça é a principal responsável por \"desenhar\" as imagens dos jogos na tela?",
+    "img": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=400&h=400&fit=crop&q=80"
+  },
+  {
+    "q": "O computador apresenta \"Telas Azuis da Morte\" (BSOD) aleatórias e frequentes no Windows. Qual é o suspeito mais comum e um teste válido?",
+    "a": [
+      "Disco Rígido (HDD). Rodar o comando chkdsk.",
+      "Fonte de Alimentação (PSU). Medir as voltagens e virificar a conexão do cabo de força.",
+      "Processador (CPU). Verificar a temperatura e trocar pasta termica.",
+      "Memória RAM. Limpar os contatos de ouro com uma borracha e testar os módulos um de cada vez."
+    ],
+    "correct": 3,
+    "hint": "A \"Tela Azul\" ocorre quando o sistema encontra um erro crítico que não pode resolver, muitas vezes por dados corrompidos em tempo real.",
+    "img": "https://images.unsplash.com/photo-1562976540-1502c2145186?w=400&h=400&fit=crop&q=80"
+  },
+  {
+    "q": "Você instalou uma nova Placa de Vídeo (GPU) potente, e agora o computador desliga subitamente apenas quando você começa a jogar. Qual o defeito mais provável?",
+    "a": [
+      "Incompatibilidade de drivers.",
+      "Fonte de Alimentação (PSU) insuficiente.",
+      "A nova GPU está queimada.",
+      "O processador (CPU) é incompatível com a GPU."
+    ],
+    "correct": 1,
+    "hint": "A nova GPU consome muito mais energia (Watts) do que a antiga, especialmente durante jogos.",
+    "img": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=400&h=400&fit=crop&q=80"
+  },
+  {
+    "q": "O computador não reconhece um SSD M.2 novo que você acabou de instalar na placa-mãe. O que deve ser verificado?",
+    "a": [
+      "A Fonte de Alimentação (PSU) não tem potência para o SSD.",
+      "O SSD está mal encaixado ou a BIOS precisa ser configurada.",
+      "O Windows precisa ser formatado.",
+      "A Memória RAM é incompatível com o SSD."
+    ],
+    "correct": 1,
+    "hint": "Antes do sistema operacional carregar, a placa-mãe (BIOS/UEFI) precisa \"ver\" o hardware.",
+    "img": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=400&h=400&fit=crop&q=80"
+  },
+  {
+    "q": "Toda vez que você desliga o computador da tomada, ele perde as configurações de data e hora. Qual é a solução?",
+    "a": [
+      "Trocar a bateria CR2032 da placa-mãe.",
+      "Reinstalar o Windows.",
+      "Atualizar a BIOS.",
+      "Trocar a Fonte de Alimentação (PSU)."
+    ],
+    "correct": 0,
+    "hint": "Existe uma pequena bateria, parecida com uma moeda, na placa-mãe, responsável por manter as configurações básicas.",
+    "img": "https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=400&h=400&fit=crop&q=80"
+  },
+  {
+    "q": "Você suspeita que sua Memória RAM está com defeito ou suja. Qual é o procedimento de limpeza mais seguro e recomendado para os contatos?",
+    "a": [
+      "Lavar o módulo de RAM com água e detergente neutro e secar ao sol.",
+      "Usar uma lixa fina para \"raspar\" a sujeira dos contatos dourados.",
+      "Passar uma borracha branca escolar (limpa) suavemente nos contatos dourados.",
+      "Mergulhar os contatos em álcool comum (de farmácia)."
+    ],
+    "correct": 2,
+    "hint": "Você precisa de algo que remova a oxidação (zinabre) sem arranhar o metal ou deixar resíduos condutores.",
+    "img": "https://images.unsplash.com/photo-1541029071515-84cc54f84dc5?w=400&h=400&fit=crop&q=80"
+  },
+  {
+    "q": "Você está montando um PC novo e precisa aplicar pasta térmica no processador. Qual é a quantidade ideal e o método correto?",
+    "a": [
+      "Aplicar uma camada grossa cobrindo todo o processador e espalhar com o dedo.",
+      "Aplicar uma quantidade do tamanho de um grão de arroz no centro do processador.",
+      "Não precisa aplicar pasta térmica, o cooler já vem com ela aplicada de fábrica sempre.",
+      "Aplicar pasta térmica também na base do cooler para melhor condução."
+    ],
+    "correct": 1,
+    "hint": "Menos é mais! O objetivo é apenas preencher as microimperfeiões entre o processador e o cooler.",
+    "img": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=400&h=400&fit=crop&q=80"
+  },
+  {
+    "q": "Ao instalar o Windows 10/11 em um disco novo, o instalador não reconhece o HD/SSD. Qual é a causa mais provável?",
+    "a": [
+      "O cabo SATA está com defeito ou mal conectado.",
+      "O disco precisa ser formatado antes no Gerenciamento de Discos do Windows.",
+      "A BIOS está configurada no modo RAID ou IDE em vez de AHCI.",
+      "O Windows não é compatível com esse tipo de disco."
+    ],
+    "correct": 2,
+    "hint": "A configuração de armazenamento na BIOS/UEFI precisa estar no modo correto para o Windows moderno detectar os discos.",
+    "img": "https://images.unsplash.com/photo-1633078654544-61b3455b9161?w=400&h=400&fit=crop&q=80"
+  },
+  {
+    "q": "Seu Windows está lento e você suspeita de vírus. Qual é o primeiro passo mais eficaz antes de formatar?",
+    "a": [
+      "Desinstalar todos os programas e reinstalar um por um.",
+      "Iniciar no Modo de Segurança e executar uma varredura completa.",
+      "Deletar a pasta System32 para remover arquivos corrompidos.",
+      "Trocar o HD/SSD imediatamente."
+    ],
+    "correct": 1,
+    "hint": "O Modo de Segurança carrega apenas os drivers essenciais, impedindo que malwares se iniciem automaticamente.",
+    "img": "https://images.unsplash.com/photo-1614064641938-3bbee52942c7?w=400&h=400&fit=crop&q=80"
+  },
+  {
+    "q": "Você montou um PC novo, ligou, mas não aparece imagem. Os LEDs da placa-mãe acendem e os coolers giram. Qual é o primeiro componente a verificar?",
+    "a": [
+      "Verificar se a Memória RAM está encaixada nos slots.",
+      "Trocar o processador esta queimado.",
+      "Verificar se o gabinete está conectado a tomada.",
+      "Reinstalar o seu sistema operacional."
+    ],
+    "correct": 0,
+    "hint": "O componente mais comum de ser mal instalado na primeira montagem é a RAM, que precisa de bastante pressão para encaixar.",
+    "img": "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=400&h=400&fit=crop&q=80"
+  },
+  {
+    "q": "Ao atualizar a BIOS da placa-mãe, a energia acabou no meio do processo. O computador não liga mais. Qual é a situação e possível solução?",
+    "a": [
+      "A placa-mãe está permanentemente danificada e precisa ser substituída.",
+      "A BIOS está corrompida. Algumas placas possuem botão de Clear CMOS para recuperação.",
+      "Apenas reinstalar o Windows resolve o problema.",
+      "Trocar o processador vai fazer o sistema funcionar novamente."
+    ],
+    "correct": 1,
+    "hint": "Atualização de BIOS interrompida é crítica, mas algumas placas têm sistemas de recuperação ou chip de BIOS backup.",
+    "img": "https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=400&h=400&fit=crop&q=80"
+  },
+  {
+    "q": "Você comprou um processador Intel de 12ª geração (LGA 1700) e uma placa-mãe com socket LGA 1200. O que acontece?",
+    "a": [
+      "Funciona normalmente, os sockets são compatíveis.",
+      "Não funciona. O processador não encaixa no socket da placa-mãe.",
+      "Funciona, mas com um desempenho muito ruim.",
+      "Precisa apenas atualizar a BIOS para funcionar."
+    ],
+    "correct": 1,
+    "hint": "Cada geração de processador Intel geralmente requer um socket específico na placa-mãe. LGA 1700 é diferente de LGA 1200.",
+    "img": "https://images.unsplash.com/photo-1555617981-dac3880eac6e?w=400&h=400&fit=crop&q=80"
+  },
+  {
+    "q": "O Windows exibe a mensagem 'Sistema Operacional não encontrado' ao ligar o PC. Qual NÃO é uma causa provável?",
+    "a": [
+      "O disco de boot (onde está instalado o Windows) não está conectado ou falhou.",
+      "A ordem de boot na BIOS está incorreta (tentando iniciar por um disco vazio).",
+      "A memória RAM está com defeito.",
+      "Os arquivos de boot do Windows estão corrompidos (MBR/GPT danificado)."
+    ],
+    "correct": 2,
+    "hint": "Essa mensagem está relacionada ao processo de inicialização do sistema operacional, não à memória RAM.",
+    "img": "https://images.unsplash.com/photo-1633078654544-61b3455b9161?w=400&h=400&fit=crop&q=80"
+  },
+  {
+    "q": "Você quer criar uma partição nova no seu HD para organizar arquivos, mas a opção 'Diminuir Volume' está acinzentada no Gerenciamento de Discos do Windows. Por quê?",
+    "a": [
+      "O disco está formatado em FAT32 em vez de NTFS.",
+      "Existem arquivos imóveis no meio do disco.",
+      "O HD está com defeito físico. O que dificulta o salvamento",
+      "É necessário usar o Prompt de Comando."
+    ],
+    "correct": 1,
+    "hint": "O Windows não consegue mover certos arquivos de sistema durante o redimensionamento enquanto está em execução.",
+    "img": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=400&h=400&fit=crop&q=80"
+  },
+  {
+    "q": "Seu computador está com problema de driver de vídeo no Windows. Qual ferramenta é recomendada para remover COMPLETAMENTE os drivers antigos antes de instalar novos?",
+    "a": [
+      "Desinstalar pelo Painel de Controle é suficiente.",
+      "Usar DDU (Display Driver Uninstaller) no Modo de Segurança.",
+      "Deletar manualmente os arquivos da pasta System32.",
+      "Formatar o Windows é a única opção."
+    ],
+    "correct": 1,
+    "hint": "Drivers de vídeo deixam resíduos que podem causar conflitos. Uma ferramenta especializada é mais eficaz.",
+    "img": "https://images.unsplash.com/photo-1633078654544-61b3455b9161?w=400&h=400&fit=crop&q=80"
+  },
+  {
+    "q": "Você quer instalar Linux e Windows no mesmo computador (dual boot). Qual é a ordem de instalação recomendada?",
+    "a": [
+      "Instalar Linux primeiro, depois Windows.",
+      "Instalar Windows primeiro, depois Linux.",
+      "A ordem não importa.",
+      "Não é possível ter dual boot, apenas com máquinas virtuais."
+    ],
+    "correct": 1,
+    "hint": "O Windows tende a sobrescrever o bootloader. O Linux (GRUB) consegue detectar e gerenciar múltiplos sistemas.",
+    "img": "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=400&h=400&fit=crop&q=80"
+  }
+];
+embaralhar(questions);
+let currentQuestion = 0;
+let score = 0;
+let playerName = "";
+let timerInterval;
+let timeLeft = 60;
+let answered = false;
+
+const content = document.getElementById("content");
+const correctSound = document.getElementById("sound-correct");
+const wrongSound = document.getElementById("sound-wrong");
+const victorySound = document.getElementById("sound-victory");
+
+document.getElementById("start-btn").addEventListener("click", startGame);
+
+function startGame() {
+    playerName = document.getElementById("playerName").value.trim();
+    if (!playerName) {
+        alert("Digite seu nome para jogar!");
+        return;
+    }
+    score = 0;
+    currentQuestion = 0;
+    showQuestion();
+}
+
+function showQuestion() {
+    clearInterval(timerInterval);
+    timeLeft = 60;
+    answered = false;
+
+    const q = questions[currentQuestion];
+    let html = `
+        <h3>${playerName}, prepare-se!</h3>
+        <div class="progress">Questão ${currentQuestion + 1} de ${questions.length}</div>
+        <div id="timer">⏱️ Tempo restante: ${timeLeft}s</div>
+       
+        <div class="game-layout">
+            <div class="left-panel">
+                <img src="${q.img}" alt="Hardware" class="hardware-img">
+                <div class="side-buttons">
+                    <button id="hint" onclick="showHint()">💡 Dica</button>
+                </div>
+            </div>
+           
+            <div class="right-panel">
+                <div class="question-text">${q.q}</div>
+                <div id="answers">`;
+   
+    q.a.forEach((alt, i) => {
+        html += `<button class="answer-btn" data-index="${i}">${alt}</button>`;
+    });
+   
+    html += `</div>
+                <div id="feedback"></div>
+            </div>
+        </div>`;
+   
+    content.innerHTML = html;
+   
+    document.querySelectorAll('.answer-btn').forEach(btn => {
+        btn.addEventListener('click', () => checkAnswer(parseInt(btn.dataset.index)));
+    });
+   
+    startTimer();
+}
+
+function startTimer() {
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        const timerEl = document.getElementById("timer");
+        if (timerEl) {
+            timerEl.innerText = `⏱️ Tempo restante: ${timeLeft}s`;
+        }
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            if (!answered) {
+                showCorrectAnswer(-1);
+            }
+        }
+    }, 1000);
+}
+
+function showHint() {
+    const hintText = questions[currentQuestion].hint;
+    alert("💡 Dica técnica: " + hintText);
+}
+
+function checkAnswer(index) {
+    if (answered) return;
+    answered = true;
+    clearInterval(timerInterval);
+   
+    const q = questions[currentQuestion];
+    const isCorrect = index === q.correct;
+   
+    if (isCorrect) {
+        score++;
+        correctSound.play();
+    } else {
+        wrongSound.play();
+    }
+   
+    showCorrectAnswer(index);
+}
+
+function showCorrectAnswer(selectedIndex) {
+    const q = questions[currentQuestion];
+    const buttons = document.querySelectorAll('.answer-btn');
+    const feedbackDiv = document.getElementById('feedback');
+   
+    buttons.forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === q.correct) {
+            btn.classList.add('correct-answer');
+        } else if (i === selectedIndex) {
+            btn.classList.add('wrong-answer');
+        }
+    });
+   
+    const sideButtons = document.querySelector('.side-buttons');
+    if (sideButtons) {
+        const nextBtn = document.createElement('button');
+        nextBtn.id = 'next-side-btn';
+        nextBtn.textContent = 'Próxima ➡️';
+        nextBtn.style.backgroundColor = '#00ffcc';
+        nextBtn.onclick = nextQuestion;
+        sideButtons.appendChild(nextBtn);
+    }
+   
+    if (selectedIndex === q.correct) {
+        feedbackDiv.innerHTML = `<div class="feedback correct">✅ Correto!</div>`;
+    } else if (selectedIndex === -1) {
+        feedbackDiv.innerHTML = `<div class="feedback wrong">⏰ Tempo esgotado!</div>`;
+    } else {
+        feedbackDiv.innerHTML = `<div class="feedback wrong">❌ Incorreto!</div>`;
+    }
+}
+
+function nextQuestion() {
+    currentQuestion++;
+    if (currentQuestion < questions.length) {
+        showQuestion();
+    } else {
+        endGame();
+    }
+}
+
+function endGame() {
+    clearInterval(timerInterval);
+    const percentage = Math.round((score / questions.length) * 100);
+    let message = "";
+
+    if (percentage === 100) {
+        message = "👑 Perfeito! Você é um T.I nato!";
+    }
+    else if (percentage >= 90) {
+        message = "🏆 Excelente! Você é um expert em TI!";
+    }
+    else if (percentage >= 70) {
+        message = "📈 Ótimo! Falta bem pouco para alcançar a perfeição!";
+    }
+    else if (percentage >= 50) {
+        message = "📚 Razoável! Continue estudando!";
+    }
+    else {
+        message = "💪 Precisa estudar mais! Não desista!";
+    }
+
+    content.innerHTML = `
+        <h3>Fim do jogo, ${playerName}!</h3>
+        <p id="score">Você acertou ${score} de ${questions.length} perguntas.</p>
+        <p style="font-size: 28px; color: #00ffcc;">Porcentagem de acerto: ${percentage}%</p>
+        <p style="font-size: 24px; color: #ffff66;">${message}</p>
+        <button id="restart-btn" onclick="restartGame()">Jogar Novamente</button>
+    `;
+}
+
+
+function restartGame() {
+    document.location.reload();
+}
+</script>
+</body>
+</html>
+
