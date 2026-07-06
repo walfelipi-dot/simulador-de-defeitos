@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NODE://MATCH — Quebra-cabeça de Redes</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
+
+  :root{
+    --bg: #060b14;
+    --bg-grid: #0a1322;
+    --panel: #0d1626;
+    --panel-2: #121f37;
+    --panel-3: #182846;
+    --line: #1f3357;
+    --cyan: #2dd4f5;
+    --cyan-dim: #2dd4f555;
+    --amber: #ffb454;
+    --green: #4ade80;
+    --red: #fb7185;
+    --text: #e6edf7;
+    --text-muted: #7c8cad;
+    --font-display: 'JetBrains Mono', 'Courier New', monospace;
+    --font-body: 'Inter', -apple-system, sans-serif;
+  }
+
+  *{ box-sizing: border-box; margin:0; padding:0; }
+
+  body{
+    background:
+      radial-gradient(circle at 15% 8%, #102036 0%, transparent 45%),
+      radial-gradient(circle at 85% 92%, #0e1c33 0%, transparent 45%),
+      var(--bg);
+    background-image:
+      linear-gradient(var(--bg-grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px),
+      radial-gradient(circle at 15% 8%, #102036 0%, transparent 45%),
+      radial-gradient(circle at 85% 92%, #0e1c33 0%, transparent 45%);
+    background-size: 36px 36px, 36px 36px, 100% 100%, 100% 100%;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    padding: 28px 16px 60px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  .wrap{ width:100%; max-width: 980px; }
+
+  /* ---------- header ---------- */
+  header{
+    display:flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 22px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 18px;
+  }
+  .brand-eyebrow{
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--cyan);
+    text-transform: uppercase;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:6px;
+  }
+  .brand-eyebrow .dot{
+    width:6px;height:6px;border-radius:50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: blink 1.6s infinite;
+  }
+  @keyframes blink{ 0%,100%{opacity:1} 50%{opacity:.25} }
+
+  h1{
+    font-family: var(--font-display);
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  h1 span{ color: var(--cyan); }
+  .subtitle{
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-top: 6px;
+    max-width: 480px;
+  }
+
+  .panel-btn{
+    font-family: var(--font-display);
+    font-size: 12px;
+    letter-spacing: 1px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    color: var(--text);
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor:pointer;
+    transition: all .15s ease;
+    text-transform: uppercase;
+  }
+  .panel-btn:hover{ border-color: var(--cyan); color: var(--cyan); }
+
+  /* ---------- setup ---------- */
+  .setup{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 22px;
+    margin-bottom: 22px;
+  }
+  .setup-row{
+    display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end;
+  }
+  .field{ display:flex; flex-direction:column; gap:8px; }
+  .field label{
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+  .field input[type=text]{
+    background: var(--bg);
+    border: 1px solid var(--line);
+    color: var(--text);
+    padding: 11px 14px;
+    border-radius: 6px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    min-width: 220px;
+    outline:none;
+  }
+  .field input[type=text]:focus{ border-color: var(--cyan); }
+
+  .diff-group{ display:flex; gap:8px; }
+  .diff-btn{
+    font-family: var(--font-display);
+    font-size: 12px;
+    padding: 11px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--text-muted);
+    cursor:pointer;
+    transition: all .15s ease;
+  }
+  .diff-btn.active{
+    border-color: var(--cyan);
+    color: var(--cyan);
+    background: #0d2233;
+    box-shadow: 0 0 0 1px var(--cyan-dim);
+  }
+  .diff-btn:hover{ color: var(--text); }
+
+  .start-btn{
+    font-family: var(--font-display);
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, var(--cyan), #1c9fc0);
+    color: #02141c;
+    font-weight: 700;
+    border: none;
+    padding: 12px 22px;
+    border-radius: 6px;
+    cursor:pointer;
+    box-shadow: 0 0 0 1px #1c9fc055, 0 6px 18px -6px var(--cyan-dim);
+    transition: transform .12s ease;
+  }
+  .start-btn:hover{ transform: translateY(-1px); }
+  .start-btn:active{ transform: translateY(0); }
+
+  /* ---------- HUD ---------- */
+  .hud{
+    display:flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .hud-item{
+    flex:1;
+    min-width: 110px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 16px;
+  }
+  .hud-item .label{
+    font-family: var(--font-display);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+  .hud-item .value{
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--cyan);
+    margin-top: 4px;
+  }
+
+  /* ---------- board ---------- */
+  #board{
+    display:grid;
+    gap: 10px;
+    margin-bottom: 26px;
+  }
+
+  .card{
+    position: relative;
+    aspect-ratio: 3/4;
+    cursor: pointer;
+    perspective: 800px;
+  }
+  .card-inner{
+    position:relative;
+    width:100%; height:100%;
+    transition: transform .45s cubic-bezier(.4,.2,.2,1);
+    transform-style: preserve-3d;
+  }
+  .card.flipped .card-inner{ transform: rotateY(180deg); }
+  .card.matched .card-inner{ transform: rotateY(180deg); }
+
+  .face{
+    position:absolute; inset:0;
+    backface-visibility: hidden;
+    border-radius: 10px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .face-back{
+    background:
+      repeating-linear-gradient(45deg, #0f1c30 0 2px, transparent 2px 14px),
+      linear-gradient(155deg, var(--panel-2), var(--panel-3));
+    border: 1px solid var(--line);
+  }
+  .face-back::after{
+    content:"";
+    position:absolute; inset:0;
+    background: radial-gradient(circle at 50% 50%, var(--cyan-dim), transparent 60%);
+    opacity:0;
+    transition: opacity .2s;
+  }
+  .card:not(.matched):hover .face-back::after{ opacity: 1; }
+  .face-back .port{
+    width: 34%; height: 34%;
+    border-radius: 6px;
+    border: 2px solid var(--line);
+    background: var(--bg);
+    position:relative;
+  }
+  .face-back .port::before, .face-back .port::after{
+    content:"";
+    position:absolute;
+    background: var(--text-muted);
+    opacity:.5;
+  }
+  .face-back .port::before{ width:2px; height:40%; top:30%; left:30%; }
+  .face-back .port::after{ width:2px; height:40%; top:30%; right:30%; }
+
+  .face-front{
+    background: linear-gradient(155deg, #0e1b30, #0a1424);
+    border: 1px solid var(--cyan);
+    box-shadow: 0 0 18px -4px var(--cyan-dim);
+    transform: rotateY(180deg);
+    padding: 8% 6% 10%;
+  }
+  .card.matched .face-front{
+    border-color: var(--green);
+    box-shadow: 0 0 18px -4px #4ade8066;
+  }
+  .face-front svg{ display:none; }
+  .photo-frame{
+    width: 76%;
+    aspect-ratio: 1/1;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #1f3357;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink: 0;
+  }
+  .photo-frame img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .card.matched .photo-frame{ border-color: var(--green); }
+  .face-front .name{
+    font-family: var(--font-display);
+    font-size: clamp(9px, 1.6vw, 12px);
+    font-weight: 700;
+    letter-spacing: .5px;
+    text-align:center;
+    margin-top: 8%;
+    color: var(--text);
+    line-height: 1.25;
+  }
+
+  @keyframes shake{
+    0%,100%{ transform: rotateY(180deg) translateX(0); }
+    25%{ transform: rotateY(180deg) translateX(-4px); }
+    75%{ transform: rotateY(180deg) translateX(4px); }
+  }
+  .card.wrong .card-inner{ animation: shake .3s; }
+
+  /* ---------- leaderboard ---------- */
+  .leaderboard{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 22px;
+  }
+  .lb-head{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .lb-head h2{
+    font-family: var(--font-display);
+    font-size: 15px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .lb-head h2 span{ color: var(--amber); }
+
+  .lb-filters{ display:flex; gap:6px; }
+  .lb-filter{
+    font-family: var(--font-display);
+    font-size: 10px;
+    padding: 6px 10px;
+    border-radius: 5px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--text-muted);
+    cursor:pointer;
+  }
+  .lb-filter.active{ color: var(--amber); border-color: var(--amber); }
+
+  table{ width:100%; border-collapse: collapse; }
+  thead th{
+    text-align:left;
+    font-family: var(--font-display);
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  tbody td{
+    padding: 10px 10px;
+    font-size: 13px;
+    border-bottom: 1px solid #15233d;
+  }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr.me{ background: #0e2233; }
+  .rank-cell{ font-family: var(--font-display); color: var(--text-muted); width: 36px; }
+  .rank-cell.r1{ color: #ffd166; }
+  .rank-cell.r2{ color: #d8dee9; }
+  .rank-cell.r3{ color: #cd853f; }
+  .score-cell{ font-family: var(--font-display); color: var(--cyan); font-weight:700; }
+  .empty-row td{ text-align:center; color: var(--text-muted); padding: 26px 10px; font-size:13px; }
+
+  /* ---------- modal ---------- */
+  .modal-overlay{
+    position: fixed; inset:0;
+    background: #02060ddd;
+    display:none;
+    align-items:center; justify-content:center;
+    z-index: 50;
+    padding: 16px;
+  }
+  .modal-overlay.show{ display:flex; }
+  .modal{
+    background: var(--panel);
+    border: 1px solid var(--cyan);
+    box-shadow: 0 0 40px -8px var(--cyan-dim);
+    border-radius: 14px;
+    padding: 30px;
+    max-width: 380px;
+    width:100%;
+    text-align:center;
+  }
+  .modal .tag{
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--green);
+    text-transform: uppercase;
+  }
+  .modal h2{
+    font-family: var(--font-display);
+    font-size: 26px;
+    margin: 10px 0 4px;
+  }
+  .modal .score-big{
+    font-family: var(--font-display);
+    font-size: 44px;
+    font-weight: 800;
+    color: var(--amber);
+    margin: 10px 0;
+  }
+  .modal .stats-line{
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 18px;
+  }
+  .modal input{
+    width:100%;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    color: var(--text);
+    padding: 11px 14px;
+    border-radius: 6px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    outline:none;
+    margin-bottom: 12px;
+  }
+  .modal input:focus{ border-color: var(--cyan); }
+  .modal-actions{ display:flex; gap:10px; }
+  .modal-actions button{ flex:1; }
+
+  footer{
+    margin-top: 28px;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-family: var(--font-display);
+    text-align:center;
+    letter-spacing: .5px;
+  }
+
+  @media (max-width: 480px){
+    .face-front .name{ font-size: 8px; }
+    .hud-item .value{ font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <div class="brand-eyebrow"><span class="dot"></span> Redes</div>
+      <h1>TECH<span> </span>LINE</h1>
+      <p class="subtitle">Vire as portas, conecte os pares e aprenda os equipamentos de uma rede de computadores.</p>
+    </div>
+    <button class="panel-btn" id="toggleSoundBtn">🔊 SOM: ON</button>
+  </header>
+
+  <div class="setup" id="setupPanel">
+    <div class="setup-row">
+      <div class="field">
+        <label>Seu nome</label>
+        <input type="text" id="playerName" placeholder="ex: Ana" maxlength="18">
+      </div>
+      <div class="field">
+        <label>Dificuldade</label>
+        <div class="diff-group" id="diffGroup">
+          <button class="diff-btn" data-diff="facil">FÁCIL · 6 pares</button>
+          <button class="diff-btn active" data-diff="medio">MÉDIO · 8 pares</button>
+          <button class="diff-btn" data-diff="dificil">DIFÍCIL · 10 pares</button>
+        </div>
+      </div>
+      <button class="start-btn" id="startBtn">▶ INICIAR JOGO</button>
+    </div>
+  </div>
+
+  <div class="hud" id="hud" style="display:none;">
+    <div class="hud-item"><div class="label">Tempo</div><div class="value" id="hudTime">00:00</div></div>
+    <div class="hud-item"><div class="label">Jogadas</div><div class="value" id="hudMoves">0</div></div>
+    <div class="hud-item"><div class="label">Pares</div><div class="value" id="hudPairs">0/0</div></div>
+    <div class="hud-item"><div class="label">Pontuação ao vivo</div><div class="value" id="hudScore">0</div></div>
+  </div>
+
+  <div id="board"></div>
+
+  <div class="leaderboard">
+    <div class="lb-head">
+      <h2>🏆 RANKING <span>// TOP CONEXÕES</span></h2>
+      <div class="lb-filters" id="lbFilters">
+        <button class="lb-filter active" data-f="todos">TODOS</button>
+        <button class="lb-filter" data-f="facil">FÁCIL</button>
+        <button class="lb-filter" data-f="medio">MÉDIO</button>
+        <button class="lb-filter" data-f="dificil">DIFÍCIL</button>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>Jogador</th><th>Nível</th><th>Tempo</th><th>Jogadas</th><th>Pontos</th>
+        </tr>
+      </thead>
+      <tbody id="lbBody">
+        <tr class="empty-row"><td colspan="6">Carregando ranking…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>NODE://MATCH — dados salvos localmente neste navegador</footer>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="tag">✓ rede totalmente conectada</div>
+    <h2>Parabéns!</h2>
+    <div class="score-big" id="finalScore">0</div>
+    <div class="stats-line" id="finalStats">tempo · jogadas</div>
+    <input type="text" id="modalName" placeholder="Digite seu nome para o ranking" maxlength="18">
+    <div class="modal-actions">
+      <button class="panel-btn" id="modalCloseBtn" style="flex:1;">FECHAR</button>
+      <button class="start-btn" id="modalSaveBtn" style="flex:1;">SALVAR NO RANKING</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+
+  // ---------- device data: SUAS imagens próprias ----------
+  // O campo "img" é só o NOME/CAMINHO do arquivo (texto entre aspas), nunca uma tag <img>.
+  // Coloque os arquivos de imagem na MESMA PASTA deste HTML, com esses nomes
+  // (ou troque o nome aqui dentro das aspas pelo nome do seu arquivo).
+  const DEVICES = [
+    { id:'roteador',  name:'Roteador',      img: 'roteador.jpg' },
+    { id:'switch',    name:'Switch',        img: 'switch.jpg' },
+    { id:'hub',       name:'Hub',           img: 'hub.jpg' },
+    { id:'modem',     name:'Modem',         img: 'modem.jpg' },
+    { id:'servidor',  name:'Servidor',      img: 'servidor.jpg' },
+    { id:'firewall',  name:'Firewall',      img: 'firewall.jpg' },
+    { id:'ap',        name:'Access Point',  img: 'access-point.jpg' },
+    { id:'cabo',      name:'Cabo de Rede',  img: 'caboderede.jpg' },
+    { id:'repetidor', name:'Repetidor',     img: 'repetidor.jpg' },
+    { id:'gateway',   name:'Gateway',       img: 'gateway.jpg' }
+  ];
+
+  const DIFF = {
+    facil:  { pairs: 6,  cols: 4, label:'Fácil'   },
+    medio:  { pairs: 8,  cols: 4, label:'Médio'   },
+    dificil:{ pairs: 10, cols: 5, label:'Difícil' }
+  };
+
+  const IMG_WRAP = (url, alt) => `<img src="${url}" alt="${alt}" loading="lazy" onerror="this.onerror=null;this.src='https://upload.wikimedia.org/wikipedia/commons/6/6c/Noimage.svg';">`;
+
+  let state = {
+    difficulty: 'medio',
+    deck: [],
+    flipped: [],
+    matchedCount: 0,
+    moves: 0,
+    seconds: 0,
+    timerId: null,
+    locked: false,
+    started: false,
+    playerName: '',
+    soundOn: true
+  };
+
+  // ---------- audio (tiny beeps via WebAudio, no external files) ----------
+  let actx = null;
+  function beep(freq, dur, type='sine', vol=0.06){
+    if(!state.soundOn) return;
+    try{
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      const o = actx.createOscillator();
+      const g = actx.createGain();
+      o.type = type; o.frequency.value = freq;
+      g.gain.value = vol;
+      o.connect(g); g.connect(actx.destination);
+      o.start();
+      g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur);
+      o.stop(actx.currentTime + dur);
+    }catch(e){}
+  }
+
+  // ---------- DOM refs ----------
+  const board = document.getElementById('board');
+  const hud = document.getElementById('hud');
+  const setupPanel = document.getElementById('setupPanel');
+  const hudTime = document.getElementById('hudTime');
+  const hudMoves = document.getElementById('hudMoves');
+  const hudPairs = document.getElementById('hudPairs');
+  const hudScore = document.getElementById('hudScore');
+  const startBtn = document.getElementById('startBtn');
+  const playerNameInput = document.getElementById('playerName');
+  const diffGroup = document.getElementById('diffGroup');
+  const modalOverlay = document.getElementById('modalOverlay');
+  const finalScore = document.getElementById('finalScore');
+  const finalStats = document.getElementById('finalStats');
+  const modalName = document.getElementById('modalName');
+  const modalSaveBtn = document.getElementById('modalSaveBtn');
+  const modalCloseBtn = document.getElementById('modalCloseBtn');
+  const lbBody = document.getElementById('lbBody');
+  const lbFilters = document.getElementById('lbFilters');
+  const toggleSoundBtn = document.getElementById('toggleSoundBtn');
+
+  diffGroup.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.diff-btn');
+    if(!btn) return;
+    [...diffGroup.children].forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    state.difficulty = btn.dataset.diff;
+  });
+
+  toggleSoundBtn.addEventListener('click', ()=>{
+    state.soundOn = !state.soundOn;
+    toggleSoundBtn.textContent = state.soundOn ? '🔊 SOM: ON' : '🔈 SOM: OFF';
+  });
+
+  function shuffle(arr){
+    for(let i=arr.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]] = [arr[j],arr[i]];
+    }
+    return arr;
+  }
+
+  function fmtTime(s){
+    const m = Math.floor(s/60).toString().padStart(2,'0');
+    const ss = (s%60).toString().padStart(2,'0');
+    return `${m}:${ss}`;
+  }
+
+  function calcLiveScore(){
+    const cfg = DIFF[state.difficulty];
+    const base = cfg.pairs * 1000;
+    const penalty = state.moves*20 + state.seconds*8;
+    return Math.max(50, base - penalty);
+  }
+
+  function startTimer(){
+    clearInterval(state.timerId);
+    state.timerId = setInterval(()=>{
+      state.seconds++;
+      hudTime.textContent = fmtTime(state.seconds);
+      hudScore.textContent = calcLiveScore();
+    },1000);
+  }
+
+  function buildDeck(){
+    const cfg = DIFF[state.difficulty];
+    const chosen = shuffle([...DEVICES]).slice(0, cfg.pairs);
+    let cards = [];
+    chosen.forEach(d=>{
+      cards.push({...d, uid: d.id+'-a'});
+      cards.push({...d, uid: d.id+'-b'});
+    });
+    return shuffle(cards);
+  }
+
+  function renderBoard(){
+    const cfg = DIFF[state.difficulty];
+    board.style.gridTemplateColumns = `repeat(${cfg.cols}, 1fr)`;
+    board.innerHTML = '';
+    state.deck.forEach((card, idx)=>{
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.dataset.idx = idx;
+      el.innerHTML = `
+        <div class="card-inner">
+          <div class="face face-back"><div class="port"></div></div>
+          <div class="face face-front">
+            <div class="photo-frame">${IMG_WRAP(card.img, card.name)}</div>
+            <div class="name">${card.name}</div>
+          </div>
+        </div>`;
+      el.addEventListener('click', ()=> onCardClick(idx));
+      board.appendChild(el);
+    });
+  }
+
+  function onCardClick(idx){
+    if(state.locked) return;
+    const cardEl = board.children[idx];
+    const card = state.deck[idx];
+    if(cardEl.classList.contains('flipped') || cardEl.classList.contains('matched')) return;
+    if(state.flipped.length >= 2) return;
+
+    cardEl.classList.add('flipped');
+    beep(440, .08, 'square', .04);
+    state.flipped.push(idx);
+
+    if(state.flipped.length === 2){
+      state.moves++;
+      hudMoves.textContent = state.moves;
+      hudScore.textContent = calcLiveScore();
+      const [i1, i2] = state.flipped;
+      const c1 = state.deck[i1], c2 = state.deck[i2];
+      state.locked = true;
+      if(c1.id === c2.id){
+        setTimeout(()=>{
+          board.children[i1].classList.add('matched');
+          board.children[i2].classList.add('matched');
+          beep(660, .12, 'triangle', .06);
+          state.matchedCount++;
+          hudPairs.textContent = `${state.matchedCount}/${DIFF[state.difficulty].pairs}`;
+          state.flipped = [];
+          state.locked = false;
+          if(state.matchedCount === DIFF[state.difficulty].pairs){
+            finishGame();
+          }
+        }, 380);
+      } else {
+        setTimeout(()=>{
+          board.children[i1].classList.add('wrong');
+          board.children[i2].classList.add('wrong');
+          beep(160, .15, 'sawtooth', .05);
+        }, 250);
+        setTimeout(()=>{
+          board.children[i1].classList.remove('flipped','wrong');
+          board.children[i2].classList.remove('flipped','wrong');
+          state.flipped = [];
+          state.locked = false;
+        }, 950);
+      }
+    }
+  }
+
+  function startGame(){
+    state.playerName = playerNameInput.value.trim();
+    state.deck = buildDeck();
+    state.flipped = [];
+    state.matchedCount = 0;
+    state.moves = 0;
+    state.seconds = 0;
+    state.locked = false;
+    state.started = true;
+
+    hud.style.display = 'flex';
+    hudTime.textContent = '00:00';
+    hudMoves.textContent = '0';
+    hudPairs.textContent = `0/${DIFF[state.difficulty].pairs}`;
+    hudScore.textContent = calcLiveScore();
+
+    renderBoard();
+    startTimer();
+    startBtn.textContent = '↺ REINICIAR';
+  }
+
+  function finishGame(){
+    clearInterval(state.timerId);
+    const score = calcLiveScore();
+    finalScore.textContent = score;
+    finalStats.textContent = `${DIFF[state.difficulty].label} · ${fmtTime(state.seconds)} · ${state.moves} jogadas`;
+    modalName.value = state.playerName || '';
+    modalOverlay.classList.add('show');
+    beep(880, .2, 'triangle', .07);
+    setTimeout(()=>beep(1100, .25, 'triangle', .07), 150);
+  }
+
+  startBtn.addEventListener('click', startGame);
+
+  modalCloseBtn.addEventListener('click', ()=>{
+    modalOverlay.classList.remove('show');
+  });
+
+  modalSaveBtn.addEventListener('click', ()=>{
+    const name = modalName.value.trim() || 'Anônimo';
+    const entry = {
+      name,
+      score: parseInt(finalScore.textContent,10),
+      difficulty: state.difficulty,
+      moves: state.moves,
+      seconds: state.seconds,
+      date: new Date().toISOString()
+    };
+    saveScore(entry);
+    modalOverlay.classList.remove('show');
+    loadLeaderboard();
+  });
+
+  // ---------- storage / leaderboard (localStorage) ----------
+  // localStorage funciona em qualquer navegador, sem precisar de internet
+  // ou de estar dentro do Claude.ai, e os dados ficam salvos no navegador
+  // do jogador (não somem ao recarregar a página, nem em 1 dia, nem em meses).
+  const LB_KEY = 'node-match-leaderboard';
+
+  function readList(){
+    try{
+      const raw = localStorage.getItem(LB_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }catch(e){
+      console.error('Erro ao ler ranking', e);
+      return [];
+    }
+  }
+
+  function saveScore(entry){
+    try{
+      let list = readList();
+      list.push(entry);
+      list.sort((a,b)=> b.score - a.score);
+      list = list.slice(0, 200);
+      localStorage.setItem(LB_KEY, JSON.stringify(list));
+    }catch(e){
+      console.error('Erro ao salvar ranking', e);
+      alert('Não foi possível salvar a pontuação neste navegador.');
+    }
+  }
+
+  let currentFilter = 'todos';
+
+  function loadLeaderboard(){
+    const list = readList();
+    let filtered = currentFilter === 'todos' ? list : list.filter(e=>e.difficulty === currentFilter);
+    filtered.sort((a,b)=> b.score - a.score);
+    filtered = filtered.slice(0, 10);
+
+    if(filtered.length === 0){
+      lbBody.innerHTML = `<tr class="empty-row"><td colspan="6">Nenhuma pontuação ainda — seja o primeiro a conectar a rede!</td></tr>`;
+      return;
+    }
+
+    lbBody.innerHTML = filtered.map((e, i)=>{
+      const rankClass = i===0 ? 'r1' : i===1 ? 'r2' : i===2 ? 'r3' : '';
+      const medal = i===0 ? '🥇' : i===1 ? '🥈' : i===2 ? '🥉' : (i+1);
+      return `<tr>
+        <td class="rank-cell ${rankClass}">${medal}</td>
+        <td>${escapeHtml(e.name)}</td>
+        <td>${DIFF[e.difficulty] ? DIFF[e.difficulty].label : e.difficulty}</td>
+        <td>${fmtTime(e.seconds)}</td>
+        <td>${e.moves}</td>
+        <td class="score-cell">${e.score}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  lbFilters.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.lb-filter');
+    if(!btn) return;
+    [...lbFilters.children].forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.f;
+    loadLeaderboard();
+  });
+
+  // init
+  loadLeaderboard();
+})();
+</script>
+</body>
+</html>
